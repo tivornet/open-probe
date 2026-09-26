@@ -1,0 +1,67 @@
+{
+  "registry_version": "0.2.0",
+  "kind": "tivor.open_probe.endpoints",
+  "default_execution": "disabled",
+  "endpoints": [
+    {
+      "endpoint_id": "openai.primary_https",
+      "provider_id": "openai",
+      "product_scope": ["OpenAI API"],
+      "purpose": "Observe the anonymous network path to the documented Models endpoint without credentials.",
+      "protocol": "https",
+      "hostname": "api.openai.com",
+      "path_policy": { "kind": "fixed", "value": "/v1/models" },
+      "authentication_required": true,
+      "anonymous_measurement_allowed": true,
+      "expected_response_class": [401, 403],
+      "allowed_methods": ["GET"],
+      "websocket_requirement": "none",
+      "rate_limit_policy": "manual only; one request per invocation",
+      "timeout_budget_ms": 5000,
+      "retry_budget": 0,
+      "max_response_bytes": 16384,
+      "max_redirects": 0,
+      "per_host_concurrency": 1,
+      "privacy_notes": "No Authorization, Cookie, request body, response body retention, or account identifier.",
+      "interpretation_limits": "Proves only bounded DNS/TCP/TLS/HTTP responder reachability. 401/403 is authorization or challenge evidence, never provider unavailability or account status.",
+      "official_source": "https://platform.openai.com/docs/api-reference/models/list",
+      "reviewed_at": "2026-09-26",
+      "review_version": "1.0.0",
+      "reviews": { "safety": "pass", "anonymous_measurement": "pass", "rate_abuse": "pass", "interpretation": "pass", "versioning": "pass" },
+      "status": "approved_canary"
+    },
+    {
+      "endpoint_id": "openai.auth_https", "provider_id": "openai", "product_scope": ["OpenAI authentication"], "purpose": "Reserved for future review.", "protocol": "https", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": null, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "none", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "No endpoint is retained before review.", "interpretation_limits": "Not executable.", "official_source": null, "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pass", "anonymous_measurement": "fail", "rate_abuse": "pass", "interpretation": "fail", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "openai.websocket_optional", "provider_id": "openai", "product_scope": ["OpenAI realtime"], "purpose": "Reserved for future WebSocket governance.", "protocol": "wss", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": true, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "review required", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "No credentialed or anonymous WebSocket attempt.", "interpretation_limits": "Not executable.", "official_source": null, "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pending", "anonymous_measurement": "fail", "rate_abuse": "pending", "interpretation": "pending", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "anthropic.primary_https", "provider_id": "anthropic", "product_scope": ["Claude API"], "purpose": "Reserved pending an official anonymous contract.", "protocol": "https", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": true, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "none", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "Authenticated endpoints are not probed.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": "https://docs.anthropic.com/en/api/overview", "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pass", "anonymous_measurement": "fail", "rate_abuse": "pass", "interpretation": "fail", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "anthropic.console_https", "provider_id": "anthropic", "product_scope": ["Claude Console"], "purpose": "Reserved pending review.", "protocol": "https", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": null, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "none", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "No browser session or cookie.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": null, "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pending", "anonymous_measurement": "fail", "rate_abuse": "pending", "interpretation": "pending", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "anthropic.websocket_optional", "provider_id": "anthropic", "product_scope": ["Claude streaming"], "purpose": "Reserved pending review.", "protocol": "wss", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": true, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "review required", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "No credentialed WebSocket attempt.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": null, "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pending", "anonymous_measurement": "fail", "rate_abuse": "pending", "interpretation": "pending", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "gemini.primary_https", "provider_id": "google_gemini", "product_scope": ["Gemini API"], "purpose": "Reserved pending an anonymous contract.", "protocol": "https", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": true, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "none", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "API keys are forbidden.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": "https://ai.google.dev/gemini-api/docs/api-key", "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pass", "anonymous_measurement": "fail", "rate_abuse": "pass", "interpretation": "fail", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "gemini.websocket_optional", "provider_id": "google_gemini", "product_scope": ["Gemini Live API"], "purpose": "Reserved pending review.", "protocol": "wss", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": true, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "ephemeral token required", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "No key or ephemeral token.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": "https://ai.google.dev/gemini-api/docs/live-api/ephemeral-tokens", "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pass", "anonymous_measurement": "fail", "rate_abuse": "pass", "interpretation": "fail", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "copilot.primary_https", "provider_id": "github_copilot", "product_scope": ["GitHub Copilot"], "purpose": "Reserved pending a non-authenticated fixed endpoint contract.", "protocol": "https", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": true, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "none", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "Wildcard allowlists are not executable endpoints.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": "https://docs.github.com/en/copilot/reference/copilot-allowlist-reference", "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pass", "anonymous_measurement": "fail", "rate_abuse": "pending", "interpretation": "fail", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "copilot.websocket_optional", "provider_id": "github_copilot", "product_scope": ["GitHub Copilot streaming"], "purpose": "Reserved pending review.", "protocol": "wss", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": true, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "review required", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "No credentialed WebSocket attempt.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": null, "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pending", "anonymous_measurement": "fail", "rate_abuse": "pending", "interpretation": "pending", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "cursor.primary_https", "provider_id": "cursor", "product_scope": ["Cursor"], "purpose": "Reserved pending a reviewed product-path endpoint.", "protocol": "https", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": null, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "none", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "Status API is provider-reported, not the local product path.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": "https://status.cursor.com/api", "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pass", "anonymous_measurement": "pass", "rate_abuse": "pass", "interpretation": "fail", "versioning": "pass" }, "status": "rejected"
+    },
+    {
+      "endpoint_id": "cursor.websocket_optional", "provider_id": "cursor", "product_scope": ["Cursor streaming"], "purpose": "Reserved pending review.", "protocol": "wss", "hostname": null, "path_policy": { "kind": "none", "value": null }, "authentication_required": null, "anonymous_measurement_allowed": false, "expected_response_class": [], "allowed_methods": [], "websocket_requirement": "review required", "rate_limit_policy": "not executable", "timeout_budget_ms": 0, "retry_budget": 0, "max_response_bytes": 0, "max_redirects": 0, "per_host_concurrency": 0, "privacy_notes": "No private or reverse-engineered endpoint.", "interpretation_limits": "UNSUPPORTED_LIVE_CANARY", "official_source": null, "reviewed_at": "2026-09-26", "review_version": "1.0.0", "reviews": { "safety": "pending", "anonymous_measurement": "fail", "rate_abuse": "pending", "interpretation": "pending", "versioning": "pass" }, "status": "rejected"
+    }
+  ]
+}

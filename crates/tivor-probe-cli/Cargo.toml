@@ -1,0 +1,24 @@
+[package]
+name = "tivor-probe-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "tivor"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+probe-contracts = { path = "../probe-contracts" }
+probe-core = { path = "../probe-core" }
+probe-measurements = { path = "../probe-measurements" }
+probe-platform-macos = { path = "../probe-platform-macos" }
+probe-redaction = { path = "../probe-redaction" }
+serde_json.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

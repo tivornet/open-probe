@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy,rustfmt
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - run: cargo test --workspace --all-targets --locked
+        env:
+          CARGO_NET_OFFLINE: "true"
+      - run: cargo run -q -p tivor-probe-cli -- registry list --kind all
+      - run: cargo run -q -p tivor-probe-cli -- validate fixtures/results/complete.private.v0.2.json
+      - run: cargo run -q -p tivor-probe-cli -- validate fixtures/exports/safe.redacted.v0.1.json --profile public-export
+      - run: test "$(cargo run -q -p tivor-probe-cli -- plan --format json | jq -r .network_execution)" = false
+      - run: jq -e '.default_execution == "disabled" and ([.endpoints[] | select(.status == "approved_canary")] | length == 1)' registry/endpoints.v0.2.json
+      - run: ./scripts/check-slice-3.sh
+      - run: ./scripts/check-slice-4.sh
+      - run: ./scripts/check-slice-5.sh
+      - run: ./scripts/check-slice-6.sh
+      - run: ./scripts/check-slice-7.sh
+      - run: cargo run -q -p tivor-probe-cli -- doctor
+      - run: test -z "$(rg -l '/opt/homebrew|s_client' crates || true)"

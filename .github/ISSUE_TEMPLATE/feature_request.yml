@@ -1,0 +1,13 @@
+name: Feature request
+description: Propose a read-only, local-first improvement.
+title: "[Feature]: "
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: problem
+    attributes: { label: Problem, description: What diagnostic gap should be addressed? }
+    validations: { required: true }
+  - type: textarea
+    id: boundary
+    attributes: { label: Proposed read-only behavior, description: Explain privacy and mutation boundaries. }
+    validations: { required: true }

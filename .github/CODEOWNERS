@@ -1,0 +1,9 @@
+# The private repository owner team is authoritative for the public candidate.
+* @tivornet/maintainers
+
+# Security, release, contracts, and endpoint governance require owner review.
+/SECURITY.md @tivornet/maintainers
+/schemas/ @tivornet/maintainers
+/registry/ @tivornet/maintainers
+/release/ @tivornet/maintainers
+/.github/workflows/ @tivornet/maintainers

@@ -1,0 +1,10 @@
+{
+  "schema_version": "0.2.0",
+  "tool": { "name": "tivor-open-probe", "version": "0.1.0", "platform_adapter": "macos-v0.1" },
+  "run": { "run_id": "export-unsafe-ip", "started_at": "2026-09-26T00:00:00Z", "finished_at": "2026-09-26T00:00:01Z", "status": "complete" },
+  "environment": { "os": "macos", "architecture": "arm64", "ipv4_available": true, "ipv6_available": false },
+  "registry_versions": { "measurements": "0.1.0", "providers": "0.1.0" },
+  "checks": [{ "check_id": "fixture.egress", "check_version": "0.1.0", "capability": "egress.observe", "status": "complete", "started_at": "2026-09-26T00:00:00Z", "finished_at": "2026-09-26T00:00:01Z", "duration_ms": 1, "evidence": [{ "evidence_id": "x1", "observed_at": "2026-09-26T00:00:01Z", "provenance": "observed", "state": "observed", "confidence": "high", "privacy_classification": "forbidden", "value_type": "egress_summary", "value": { "exact_ip": "192.0.2.1", "ip_family": "ipv4" }, "address_family": "ipv4", "limitations": [], "supports": [] }], "errors": [] }],
+  "provider_paths": [], "limitations": [], "permissions": [{ "capability": "outbound_network", "mode": "required", "result": "available" }],
+  "redaction": { "state": "redacted_export", "policy_id": "public_export_v0.1", "validation": "passed", "removed_paths": [], "transformed_paths": [] }
+}

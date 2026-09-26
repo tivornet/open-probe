@@ -1,0 +1,15 @@
+{
+  "product": "Tivor Open Probe",
+  "binary": "tivor",
+  "version": "0.1.0",
+  "release_channel": "beta",
+  "release_tag": "v0.1.0-beta.1",
+  "target": "aarch64-apple-darwin",
+  "result_schema": "0.2.0",
+  "registry_versions": {
+    "measurements": "0.1.0",
+    "providers": "0.1.0",
+    "endpoints": "0.2.0",
+    "provider_path_targets": "0.1.0"
+  }
+}

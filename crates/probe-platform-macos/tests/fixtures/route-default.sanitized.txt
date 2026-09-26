@@ -1,0 +1,6 @@
+   route to: default
+destination: default
+       mask: default
+    gateway: 198.18.0.1
+  interface: utun7
+      flags: <UP,GATEWAY,DONE,STATIC,PRCLONING,GLOBAL>

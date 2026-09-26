@@ -1,0 +1,18 @@
+{
+  "registry_version": "0.1.0",
+  "kind": "tivor.open_probe.endpoints",
+  "endpoints": [
+    { "endpoint_id": "openai.primary_https", "provider_id": "openai", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "openai.auth_https", "provider_id": "openai", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "openai.websocket_optional", "provider_id": "openai", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "anthropic.primary_https", "provider_id": "anthropic", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "anthropic.console_https", "provider_id": "anthropic", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "anthropic.websocket_optional", "provider_id": "anthropic", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "gemini.primary_https", "provider_id": "google_gemini", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "gemini.websocket_optional", "provider_id": "google_gemini", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "copilot.primary_https", "provider_id": "github_copilot", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "copilot.websocket_optional", "provider_id": "github_copilot", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "cursor.primary_https", "provider_id": "cursor", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] },
+    { "endpoint_id": "cursor.websocket_optional", "provider_id": "cursor", "review_status": "pending_review", "url": null, "required_reviews": ["safety", "anonymous_measurement", "rate_abuse", "interpretation", "versioning"] }
+  ]
+}

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://tivor.net/trust/
+    about: Do not file public security issues; use the private contact published here when available.

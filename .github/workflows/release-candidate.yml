@@ -1,0 +1,28 @@
+name: Release candidate checks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-release-candidate:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - run: cargo test --workspace --all-targets --locked
+      - run: ./scripts/audit-public-repository-v0.1.sh
+      - run: ./scripts/check-release-v0.1.sh
+      - run: ./scripts/generate-release-provenance-v0.1.sh
+
+      # Intentionally no artifact upload. Developer ID signing and notarization
+      # require a separately approved ceremony and repository secrets that do
+      # not exist in this pre-release workflow.

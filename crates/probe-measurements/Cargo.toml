@@ -1,0 +1,25 @@
+[package]
+name = "probe-measurements"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+base64.workspace = true
+getrandom.workspace = true
+httparse.workspace = true
+rustls.workspace = true
+rustls-pki-types.workspace = true
+rustls-platform-verifier.workspace = true
+serde.workspace = true
+sha1.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-rustls.workspace = true
+
+[dev-dependencies]
+rcgen.workspace = true
+
+[lints]
+workspace = true

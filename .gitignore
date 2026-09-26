@@ -1,0 +1,10 @@
+/target/
+/dist/
+/.DS_Store
+**/.DS_Store
+*.private.json
+*.redacted.json
+
+# Local engineering history retained outside the future public repository.
+/docs/OPEN-PROBE-V0.1-ARCHITECTURE-GATE-REPORT.md
+/docs/OPEN-PROBE-V0.1-SLICE-*

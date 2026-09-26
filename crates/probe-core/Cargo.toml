@@ -1,0 +1,16 @@
+[package]
+name = "probe-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+probe-contracts = { path = "../probe-contracts" }
+probe-platform-macos = { path = "../probe-platform-macos" }
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

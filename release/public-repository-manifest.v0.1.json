@@ -1,0 +1,18 @@
+{
+  "contract": "PUBLIC_REPOSITORY_MANIFEST_V0.1",
+  "include": [
+    ".github", "crates", "docs", "fixtures", "registry", "release", "schemas", "scripts",
+    "Cargo.lock", "Cargo.toml", "rust-toolchain.toml", ".gitignore", "LICENSE", "NOTICE",
+    "README.md", "INSTALL.md", "UNINSTALL.md", "SECURITY.md", "CONTRIBUTING.md",
+    "CHANGELOG.md", "PRIVACY.md", "KNOWN-ISSUES.md", "RELEASE-NOTES-V0.1.0-BETA.md",
+    "PUBLIC-REPOSITORY-AUDIT-V0.1.md", "CLEAN-MACHINE-ACCEPTANCE-V0.1.md",
+    "GITHUB-RELEASE-PREPARATION-V0.1.md", "PUBLIC-BETA-PRE-RELEASE-CHECKLIST.md",
+    "GITHUB-PRIVATE-RELEASE-STAGING-V0.1.md", "PRIVATE-TO-PUBLIC-FINAL-CHECKLIST.md",
+    "OPEN-PROBE-GITHUB-STAGING-REPORT-V0.1.md"
+  ],
+  "exclude_local": [
+    "target", "dist", ".DS_Store", "docs/OPEN-PROBE-V0.1-ARCHITECTURE-GATE-REPORT.md",
+    "docs/OPEN-PROBE-V0.1-SLICE-*"
+  ],
+  "fixture_policy": "Synthetic negative fixtures may contain fake secret keys and documentation-only addresses; they must never contain captured user data."
+}

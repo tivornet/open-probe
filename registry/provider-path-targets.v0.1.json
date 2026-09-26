@@ -1,0 +1,26 @@
+{
+  "registry_version": "0.1.0",
+  "kind": "tivor.open_probe.provider_path_targets",
+  "default_execution": "disabled",
+  "targets": [{
+    "target_id": "anthropic.claude_code_api_path",
+    "provider_id": "anthropic",
+    "product_scope": ["Claude API", "Claude Code"],
+    "hostname": "api.anthropic.com",
+    "port": 443,
+    "purpose": "Observe the anonymous DNS, TCP, and certificate-validated TLS path to the official Anthropic API host used by Claude Code.",
+    "official_sources": ["https://docs.anthropic.com/en/docs/claude-code/corporate-proxy", "https://docs.anthropic.com/en/docs/claude-code/getting-started", "https://support.claude.com/en/articles/12111783-create-and-edit-files-with-claude"],
+    "authentication_requirement": "Authentication is required for application requests; no authentication is used for DNS/TCP/TLS observation.",
+    "anonymous_layers": { "dns": "approved", "tcp": "approved", "tls": "approved", "https": "not_approved" },
+    "timeout_budget_ms": 5000,
+    "connection_budget": 1,
+    "retry_budget": 0,
+    "concurrency": 1,
+    "privacy_notes": "No HTTP request, request body, key, OAuth token, cookie, session data, certificate chain retention, or trust-store capture.",
+    "interpretation_limits": "DNS/TCP/validated TLS completion is provider-path evidence only. Application-layer and provider-health verdicts remain withheld.",
+    "reviewed_at": "2026-09-26",
+    "review_version": "1.0.0",
+    "reviews": { "safety": "pass", "anonymous_measurement": "pass", "rate_abuse": "pass", "interpretation": "pass", "privacy": "pass", "versioning": "pass" },
+    "status": "approved_provider_path"
+  }]
+}

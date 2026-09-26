@@ -1,0 +1,17 @@
+{
+  "contract": "PUBLIC_BETA_READINESS_V0.1",
+  "status": "NOT_READY",
+  "gates": {
+    "core": "PASS",
+    "providers": "PASS",
+    "distribution": "PASS_UNSIGNED_ENGINEERING_CANDIDATE_NOT_PUBLIC",
+    "package_safe_tls": "PASS",
+    "public_repository_audit": "PASS_PRE_RELEASE",
+    "public_documentation": "PASS",
+    "website_preview": "PASS_DISABLED_CTA",
+    "signing": "ADHOC_ONLY_NO_DEVELOPER_IDENTITY",
+    "notarization": "NOT_ATTEMPTED",
+    "quality": "PASS"
+  },
+  "blocking_gates": ["signing", "notarization"]
+}

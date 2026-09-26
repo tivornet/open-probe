@@ -1,0 +1,1 @@
+{ "layer": "tcp", "state": "observed", "port": 443, "connection_budget": 1, "provider_health_verdict": "withheld" }

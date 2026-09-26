@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tivor.net/open-probe/probe-result/v0.1",
+  "title": "Tivor Open Probe Result V0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "run", "environment", "registry_versions", "checks", "provider_paths", "limitations", "permissions", "redaction"],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "tool": {
+      "type": "object", "additionalProperties": false, "required": ["name", "version", "platform_adapter"],
+      "properties": { "name": { "const": "tivor-open-probe" }, "version": { "type": "string" }, "platform_adapter": { "type": "string" } }
+    },
+    "run": {
+      "type": "object", "additionalProperties": false, "required": ["run_id", "started_at", "finished_at", "status"],
+      "properties": {
+        "run_id": { "type": "string", "minLength": 1 },
+        "started_at": { "type": "string", "format": "date-time" },
+        "finished_at": { "type": "string", "format": "date-time" },
+        "status": { "enum": ["complete", "partial", "canceled", "failed"] }
+      }
+    },
+    "environment": {
+      "type": "object", "additionalProperties": false, "required": ["os", "architecture"],
+      "properties": {
+        "os": { "const": "macos" }, "architecture": { "const": "arm64" },
+        "ipv4_available": { "type": ["boolean", "null"] }, "ipv6_available": { "type": ["boolean", "null"] }
+      }
+    },
+    "registry_versions": {
+      "type": "object", "additionalProperties": false, "required": ["measurements", "providers"],
+      "properties": { "measurements": { "type": "string" }, "providers": { "type": "string" } }
+    },
+    "checks": { "type": "array", "items": { "$ref": "#/$defs/check" } },
+    "execution": {
+      "type": "object", "additionalProperties": false, "required": ["mode", "live_canary", "experimental"],
+      "properties": {
+        "mode": { "const": "LIVE_CANARY" },
+        "live_canary": { "const": true },
+        "experimental": { "const": true }
+      }
+    },
+    "provider_paths": { "type": "array", "items": { "$ref": "#/$defs/providerPath" } },
+    "limitations": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "permissions": { "type": "array", "items": { "$ref": "#/$defs/permission" } },
+    "redaction": {
+      "type": "object", "additionalProperties": false, "required": ["state", "policy_id", "validation"],
+      "properties": {
+        "state": { "enum": ["private_local", "redacted_export"] },
+        "policy_id": { "enum": ["none", "public_export_v0.1"] },
+        "validation": { "enum": ["not_applicable", "passed", "failed"] },
+        "removed_paths": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "transformed_paths": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    }
+  },
+  "$defs": {
+    "state": { "enum": ["healthy", "degraded", "unstable", "unavailable", "challenge", "incomplete"] },
+    "provenance": { "enum": ["observed", "inferred", "provider_reported", "unknown"] },
+    "confidence": { "enum": ["high", "medium", "low", "unknown"] },
+    "error": {
+      "type": "object", "additionalProperties": false, "required": ["code", "phase", "retryable", "summary"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[a-z]+\\.[a-z0-9_]+$" },
+        "phase": { "type": "string" }, "retryable": { "type": "boolean" }, "summary": { "type": "string" },
+        "cause_code": { "type": "string", "pattern": "^[a-z]+\\.[a-z0-9_]+$" }
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["evidence_id", "observed_at", "provenance", "state", "confidence", "privacy_classification", "value_type", "value", "limitations", "supports"],
+      "properties": {
+        "evidence_id": { "type": "string" }, "observed_at": { "type": "string", "format": "date-time" },
+        "provenance": { "$ref": "#/$defs/provenance" }, "state": { "$ref": "#/$defs/state" }, "confidence": { "$ref": "#/$defs/confidence" },
+        "privacy_classification": { "enum": ["public", "export_allowed", "export_transform", "private_local", "forbidden"] },
+        "value_type": { "type": "string" }, "value": { "type": ["object", "array", "string", "number", "boolean", "null"] },
+        "address_family": { "enum": ["ipv4", "ipv6", "not_applicable", "unknown"] },
+        "limitations": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "supports": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "check": {
+      "type": "object", "additionalProperties": false,
+      "required": ["check_id", "check_version", "capability", "status", "started_at", "finished_at", "duration_ms", "evidence", "errors"],
+      "properties": {
+        "check_id": { "type": "string" }, "check_version": { "type": "string" }, "capability": { "type": "string" },
+        "status": { "enum": ["complete", "partial", "failed", "canceled", "unsupported"] },
+        "started_at": { "type": "string", "format": "date-time" }, "finished_at": { "type": "string", "format": "date-time" },
+        "duration_ms": { "type": "integer", "minimum": 0 }, "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+        "errors": { "type": "array", "items": { "$ref": "#/$defs/error" } }
+      }
+    },
+    "providerPath": {
+      "type": "object", "additionalProperties": false,
+      "required": ["provider_id", "adapter_version", "local_path_state", "confidence", "supporting_evidence_ids", "limitations"],
+      "properties": {
+        "provider_id": { "type": "string" }, "adapter_version": { "type": "string" },
+        "local_path_state": { "$ref": "#/$defs/state" }, "confidence": { "$ref": "#/$defs/confidence" },
+        "supporting_evidence_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "provider_reported_state": { "type": ["string", "null"] },
+        "limitations": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "permission": {
+      "type": "object", "additionalProperties": false, "required": ["capability", "mode", "result"],
+      "properties": {
+        "capability": { "enum": ["outbound_dns", "outbound_network", "read_interfaces", "read_routes", "observe_tun", "write_local_file", "export_redacted_file"] },
+        "mode": { "enum": ["required", "optional", "explicit_action"] },
+        "result": { "enum": ["available", "denied", "unsupported", "not_requested"] }
+      }
+    }
+  }
+}
