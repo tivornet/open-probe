@@ -32,6 +32,7 @@ Download the signed and notarized Beta from the [official GitHub release](https:
 tivor version
 tivor doctor                  # local-only; no provider request
 tivor doctor --provider-path  # explicit governed provider-path opt-in
+tivor doctor --provider-path --verbose  # append canonical machine semantics
 ```
 
 See [INSTALL.md](INSTALL.md), [PRIVACY.md](PRIVACY.md), and [KNOWN-ISSUES.md](KNOWN-ISSUES.md).

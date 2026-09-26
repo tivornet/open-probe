@@ -86,6 +86,27 @@ pub struct ReliabilitySnapshot {
     pub provenance: String,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LayerStatus {
+    Available,
+    UnavailableDuringSnapshot,
+    Stable,
+    Degraded,
+    NotTested,
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HumanDiagnostic {
+    pub overall: String,
+    pub basic_path: LayerStatus,
+    pub application_path: LayerStatus,
+    pub reliability: Reliability,
+    pub deepest_tested_stage: Option<Stage>,
+    pub explanation: String,
+    pub impact: String,
+}
+
 pub fn percentile(sorted: &[u64], p: u8) -> Option<u64> {
     if sorted.is_empty() {
         None
@@ -238,12 +259,139 @@ pub fn analyze(
         provenance: "observed_and_deterministic_analysis".into(),
     }
 }
+fn stage_name(stage: Stage) -> &'static str {
+    match stage {
+        Stage::Dns => "DNS",
+        Stage::Tcp => "TCP",
+        Stage::Tls => "TLS",
+        Stage::Https => "HTTPS",
+        Stage::LongConnection => "Long connection",
+    }
+}
+fn layer_text(status: LayerStatus) -> &'static str {
+    match status {
+        LayerStatus::Available => "AVAILABLE",
+        LayerStatus::UnavailableDuringSnapshot => "UNAVAILABLE DURING THIS TEST",
+        LayerStatus::Stable => "STABLE",
+        LayerStatus::Degraded => "DEGRADED",
+        LayerStatus::NotTested => "NOT AVAILABLE / NOT TESTED",
+        LayerStatus::Unknown => "UNKNOWN",
+    }
+}
+fn latency(value: Option<u64>) -> String {
+    value.map_or_else(|| "Not available".into(), |v| format!("{v} ms"))
+}
+
+pub fn derive_human_diagnostic(s: &ReliabilitySnapshot) -> HumanDiagnostic {
+    let transport = [Stage::Dns, Stage::Tcp, Stage::Tls];
+    let tested_transport: Vec<_> = transport
+        .iter()
+        .filter_map(|stage| s.stages.get(stage))
+        .collect();
+    let basic_path = if tested_transport.is_empty() {
+        LayerStatus::Unknown
+    } else if tested_transport.iter().all(|m| m.successes > 0) {
+        if tested_transport.iter().all(|m| m.success_rate == 1.0) {
+            LayerStatus::Stable
+        } else {
+            LayerStatus::Available
+        }
+    } else {
+        LayerStatus::UnavailableDuringSnapshot
+    };
+    let application_path = match s.stages.get(&Stage::Https) {
+        None => LayerStatus::NotTested,
+        Some(m) if m.successes == 0 => LayerStatus::UnavailableDuringSnapshot,
+        Some(m) if m.success_rate == 1.0 => LayerStatus::Stable,
+        Some(_) => LayerStatus::Degraded,
+    };
+    let overall = match (basic_path, application_path, s.reliability) {
+        (_, LayerStatus::UnavailableDuringSnapshot, _) => "SERIOUS APPLICATION-PATH INSTABILITY",
+        (_, LayerStatus::Degraded, Reliability::Unstable) => "APPLICATION-PATH INSTABILITY",
+        (_, LayerStatus::Degraded, _) => "APPLICATION PATH DEGRADED",
+        (LayerStatus::Stable, LayerStatus::NotTested, _) => "BASIC TRANSPORT PATH STABLE",
+        (_, LayerStatus::Stable, Reliability::Stable) => "TESTED NETWORK PATH STABLE",
+        (_, _, Reliability::Unstable) => "NETWORK PATH UNSTABLE",
+        _ => "NETWORK PATH INCOMPLETE",
+    }
+    .into();
+    let deepest_tested_stage = [
+        Stage::LongConnection,
+        Stage::Https,
+        Stage::Tls,
+        Stage::Tcp,
+        Stage::Dns,
+    ]
+    .into_iter()
+    .find(|stage| s.stages.contains_key(stage));
+    let explanation = if let Some(https) = s.stages.get(&Stage::Https) {
+        if https.successes == 0 {
+            let lower = tested_transport.iter().all(|m| m.successes == m.attempts);
+            format!(
+                "All {} HTTPS measurements failed{}.",
+                https.attempts,
+                if lower {
+                    " while the tested DNS, TCP and TLS stages completed successfully"
+                } else {
+                    " and lower-layer failures were also observed"
+                }
+            )
+        } else if https.failures > 0 {
+            format!(
+                "{} of {} HTTPS measurements failed; {} succeeded during this snapshot.",
+                https.failures, https.attempts, https.successes
+            )
+        } else {
+            format!(
+                "All {} governed HTTPS measurements completed successfully during this snapshot.",
+                https.attempts
+            )
+        }
+    } else if let Some(stage) = deepest_tested_stage {
+        let m = &s.stages[&stage];
+        format!("All {} tested {} measurements completed successfully. No application-layer measurement was approved.", m.successes, stage_name(stage))
+    } else {
+        "No governed path measurement was available.".into()
+    };
+    let impact = match application_path { LayerStatus::UnavailableDuringSnapshot => "AI application requests may wait, time out, reconnect, or interrupt long-running work.", LayerStatus::Degraded => "AI application requests may intermittently wait, retry, or reconnect.", LayerStatus::Stable => "No short-window instability was observed in the governed application path; authenticated usability remains unverified.", LayerStatus::NotTested => "No short-window transport instability was observed. Application-layer behavior and full product usability were not tested.", _ => "User-visible impact cannot be determined from the available evidence." }.into();
+    HumanDiagnostic {
+        overall,
+        basic_path,
+        application_path,
+        reliability: s.reliability,
+        deepest_tested_stage,
+        explanation,
+        impact,
+    }
+}
+
 pub fn physical_exam(s: &ReliabilitySnapshot, name: &str) -> String {
+    let d = derive_human_diagnostic(s);
     let mut metrics = String::new();
     for (stage, m) in &s.stages {
-        metrics.push_str(&format!("\n{:?}: attempts={} success_rate={:.0}% p50_ms={:?} p95_ms={:?} max_ms={:?} timeouts={} resets={} failure_burst={}", stage, m.attempts, m.success_rate * 100.0, m.p50_ms, m.p95_ms, m.max_ms, m.timeouts, m.resets, m.longest_failure_burst));
+        metrics.push_str(&format!(
+            "\n{}: {}/{} successful; median {}; p95 {}; max {}; timeouts {}; resets {}",
+            stage_name(*stage),
+            m.successes,
+            m.attempts,
+            latency(m.p50_ms),
+            latency(m.p95_ms),
+            latency(m.max_ms),
+            m.timeouts,
+            m.resets
+        ));
     }
-    format!("{name}\nAI Network Condition: {}\nReachability: {}\nReliability: {}\nMeasurement window: {} seconds{}\nPrimary abnormal stage: {}\nWhy Tivor says this: deterministic observed stage metrics under analysis policy {}\nWhat this may affect: intermittent failures or elevated tail latency may affect waiting, reconnects, streaming, or long-running agent work; authenticated usability is not verified.\nRoot cause: NOT DETERMINED\nLimitations: {}", format!("{:?}",s.reliability).to_uppercase(), format!("{:?}",s.reachability).to_uppercase(), format!("{:?}",s.reliability).to_uppercase(), s.measurement_window_seconds, metrics, format!("{:?}",s.failure_localization).to_uppercase(), s.analysis_policy_version, s.limitations.join("; "))
+    let abnormal = match s.failure_localization {
+        FailureLocalization::NoneObserved => "No abnormal stage observed",
+        FailureLocalization::MultiStage => "Multiple stages",
+        FailureLocalization::Unknown => "Unknown",
+        FailureLocalization::Dns => "DNS",
+        FailureLocalization::Tcp => "TCP",
+        FailureLocalization::Tls => "TLS",
+        FailureLocalization::Https => "HTTPS",
+        FailureLocalization::LongConnection => "Long connection",
+    };
+    format!("{name}\n\nOverall:\n{}\n\nBasic network path:\n{}\n\nApplication path:\n{}\n\nShort-window reliability:\n{}\n\n{}-second snapshot:{}\n\nPrimary abnormal stage:\n{}\n\nWhy Tivor says this:\n{}\n\nWhat this may affect:\n{}\n\nRoot cause:\nNOT DETERMINED\n\nWhat remains unknown:\nAuthenticated account access, full product usability, and causal attribution are not verified.", d.overall, layer_text(d.basic_path), layer_text(d.application_path), format!("{:?}", d.reliability).to_uppercase(), s.measurement_window_seconds, metrics, abnormal, d.explanation, d.impact)
 }
 
 #[cfg(test)]
@@ -420,6 +568,81 @@ mod tests {
             &ss(Stage::Https, &[Some(1), Some(2), Some(3)]),
             false,
         );
+        probe_contracts::validate_reliability_snapshot(&serde_json::to_value(snapshot).unwrap())
+            .unwrap();
+    }
+    fn layered(https: &[Option<u64>]) -> ReliabilitySnapshot {
+        let mut all = ss(Stage::Dns, &[Some(4), Some(5), Some(4), Some(14), Some(4)]);
+        all.extend(ss(
+            Stage::Tcp,
+            &[Some(20), Some(20), Some(21), Some(20), Some(20)],
+        ));
+        all.extend(ss(
+            Stage::Tls,
+            &[Some(40), Some(41), Some(40), Some(42), Some(40)],
+        ));
+        all.extend(ss(Stage::Https, https));
+        analyze("provider", 25, &all, false)
+    }
+    #[test]
+    fn human_https_total_failure_is_layered_not_available() {
+        let snapshot = layered(&[None, None, None, None, None]);
+        let diagnostic = derive_human_diagnostic(&snapshot);
+        assert_eq!(diagnostic.basic_path, LayerStatus::Stable);
+        assert_eq!(
+            diagnostic.application_path,
+            LayerStatus::UnavailableDuringSnapshot
+        );
+        assert_eq!(diagnostic.overall, "SERIOUS APPLICATION-PATH INSTABILITY");
+        let report = physical_exam(&snapshot, "Provider");
+        assert!(report.contains("All 5 HTTPS measurements failed"));
+        assert!(!report.contains("Some("));
+        assert!(!report.contains("NONEOBSERVED"));
+    }
+    #[test]
+    fn human_tls_only_is_scoped_not_full_provider_stability() {
+        let snapshot = analyze(
+            "provider",
+            25,
+            &ss(
+                Stage::Tls,
+                &[Some(247), Some(250), Some(260), Some(300), Some(527)],
+            ),
+            false,
+        );
+        let diagnostic = derive_human_diagnostic(&snapshot);
+        assert_eq!(diagnostic.application_path, LayerStatus::NotTested);
+        assert_eq!(diagnostic.overall, "BASIC TRANSPORT PATH STABLE");
+        assert!(
+            physical_exam(&snapshot, "Provider").contains("full product usability were not tested")
+        );
+    }
+    #[test]
+    fn human_all_supported_stages_stable() {
+        let diagnostic = derive_human_diagnostic(&layered(&[
+            Some(50),
+            Some(51),
+            Some(52),
+            Some(50),
+            Some(51),
+        ]));
+        assert_eq!(diagnostic.overall, "TESTED NETWORK PATH STABLE");
+        assert_eq!(diagnostic.application_path, LayerStatus::Stable);
+    }
+    #[test]
+    fn human_mixed_https_failure_is_evidence_linked() {
+        let diagnostic =
+            derive_human_diagnostic(&layered(&[Some(50), None, Some(55), None, Some(51)]));
+        assert_eq!(diagnostic.application_path, LayerStatus::Degraded);
+        assert!(diagnostic
+            .explanation
+            .contains("2 of 5 HTTPS measurements failed"));
+    }
+    #[test]
+    fn machine_snapshot_semantics_are_unchanged_and_versioned() {
+        let snapshot = layered(&[None, None, None, None, None]);
+        assert_eq!(snapshot.schema_version, "0.1.0");
+        assert_eq!(snapshot.reachability, Reachability::Available);
         probe_contracts::validate_reliability_snapshot(&serde_json::to_value(snapshot).unwrap())
             .unwrap();
     }

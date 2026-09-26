@@ -71,6 +71,9 @@ enum Command {
         /// Explicitly execute governed real provider-path measurements.
         #[arg(long = "provider-path", visible_alias = "live-canary")]
         live_canary: bool,
+        /// Include canonical machine semantics after the human report.
+        #[arg(long)]
+        verbose: bool,
     },
 }
 
@@ -118,11 +121,13 @@ fn main() -> Result<()> {
             output_private,
             export_public,
             live_canary,
+            verbose,
         } => doctor(
             local,
             output_private.as_ref(),
             export_public.as_ref(),
             live_canary,
+            verbose,
         ),
     }
 }
@@ -132,6 +137,7 @@ fn doctor(
     output_private: Option<&PathBuf>,
     export_public: Option<&PathBuf>,
     live_canary: bool,
+    verbose: bool,
 ) -> Result<()> {
     let _local_only_default = local || !live_canary;
     let started_epoch = SystemTime::now()
@@ -294,10 +300,16 @@ fn doctor(
             )
         );
         println!("Anthropic application-layer evidence: NOT AVAILABLE");
-        println!("\nMachine semantics (full provider health remains withheld):");
     }
-    println!("{}", human_summary(&result));
-    println!("provider_path_execution={live_canary}");
+    if !live_canary || verbose {
+        if live_canary {
+            println!("\nTechnical evidence (canonical machine semantics):");
+        }
+        println!("{}", human_summary(&result));
+    }
+    if verbose {
+        println!("provider_path_execution={live_canary}");
+    }
     Ok(())
 }
 
