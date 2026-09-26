@@ -318,10 +318,14 @@ fn doctor(
         }
         println!("{}", human_summary(&result));
     }
-    if verbose {
-        println!("provider_path_execution={live_canary}");
+    if let Some(executed) = provider_path_execution_status(live_canary, verbose) {
+        println!("provider_path_execution={executed}");
     }
     Ok(())
+}
+
+fn provider_path_execution_status(live_canary: bool, verbose: bool) -> Option<bool> {
+    (!live_canary || verbose).then_some(live_canary)
 }
 
 fn execute_provider_path(target: &ProviderPathTarget, observed_at: &str) -> RecordedProviderPath {
@@ -686,6 +690,8 @@ mod tests {
             Command::Doctor { live_canary, .. } => assert!(!live_canary),
             _ => panic!("unexpected command"),
         }
+        assert_eq!(provider_path_execution_status(false, false), Some(false));
+        assert_eq!(provider_path_execution_status(true, false), None);
     }
 
     #[test]
