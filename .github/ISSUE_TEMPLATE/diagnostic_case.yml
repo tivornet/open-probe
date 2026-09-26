@@ -1,0 +1,36 @@
+name: Diagnostic / network reliability case
+description: Share an optional, REDACTED case to improve reproducible diagnosis.
+title: "[Diagnostic case]: "
+labels: [diagnostic-case, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Contribution is voluntary. Share REDACTED output only.
+
+        **DO NOT post credentials, cookies, API keys, tokens, exact private or public IP addresses, hostnames, proxy credentials, subscription URLs, or sensitive network configuration.**
+  - type: input
+    id: version
+    attributes: { label: Tivor version, placeholder: "tivor 0.1.0-beta.1" }
+    validations: { required: true }
+  - type: textarea
+    id: symptom
+    attributes: { label: Symptom and approximate time, description: Describe behavior without account or project identifiers. }
+    validations: { required: true }
+  - type: dropdown
+    id: provider
+    attributes: { label: Product surface, options: ["OpenAI / ChatGPT / Codex", "Claude / Claude Code", "Other / unsupported"] }
+    validations: { required: true }
+  - type: textarea
+    id: redacted
+    attributes: { label: Optional REDACTED evidence, description: Do not paste local/private result files. Include only fields you have reviewed. }
+  - type: textarea
+    id: comparison
+    attributes: { label: Controlled comparison, description: Optional—what changed when one variable was altered? }
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I reviewed this report and removed all credentials, secrets, cookies, tokens, addresses, hostnames, and sensitive configuration.
+          required: true
