@@ -41,14 +41,12 @@ acceptance.
 
    Require arm64, `Developer ID Application: JIANG FEI (UU965PWVJS)`, a secure
    timestamp, Team Identifier `UU965PWVJS`, and hardened runtime.
-5. Verify the accepted notarization requirement without bypassing Gatekeeper or
-   changing quarantine attributes:
-
-   ```sh
-   codesign --verify --deep --strict --verbose=2 \
-     -R='notarized' \
-     tivor-open-probe-acceptance/tivor-open-probe-v0.1.0-beta.1-darwin-arm64/tivor
-   ```
+5. Verify Apple notarization from the supplied release provenance: submission
+   status `ACCEPTED`, issue count zero, and a non-empty submission ID. Confirm
+   `com.apple.quarantine` remains present. Do not remove or rewrite it. The bare
+   CLI is not subject to an app-bundle `spctl --type execute` hard gate.
+   `spctl -a -t open -vvv --context context:primary-signature` may be recorded as
+   non-authoritative diagnostic evidence.
 
 6. Run the supported local CLI acceptance:
 

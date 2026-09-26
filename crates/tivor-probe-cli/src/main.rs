@@ -12,7 +12,7 @@ use probe_contracts::{
     load_and_validate_capability_registry, load_and_validate_provider_path_targets,
     load_and_validate_registries, validate_result, Endpoint, ProviderPathTarget,
 };
-use probe_core::reliability::{analyze, physical_exam, Stage, StageSample};
+use probe_core::reliability::{analyze, physical_exam, ReportLabels, Stage, StageSample};
 use probe_core::{
     build_plan, build_private_result, human_summary, normalize_canary, normalize_provider_path,
     CanaryBudget, CanaryOutcome, CanaryTimings, PipelineInput, ProviderPathOutcome, RecordedCanary,
@@ -276,6 +276,10 @@ fn doctor(
     }
     if live_canary {
         println!(
+            "Tivor AI Network Check\n{}-second reliability snapshot",
+            capability_registry.sampling_policy.window_seconds
+        );
+        println!(
             "\n{}",
             physical_exam(
                 &analyze(
@@ -284,7 +288,11 @@ fn doctor(
                     &openai_samples,
                     false
                 ),
-                "OpenAI / ChatGPT / Codex"
+                ReportLabels {
+                    display_name: "OpenAI / ChatGPT / Codex",
+                    provider_name: "OpenAI",
+                    application_name: "ChatGPT or Codex"
+                }
             )
         );
         println!(
@@ -296,10 +304,13 @@ fn doctor(
                     &anthropic_samples,
                     false
                 ),
-                "Claude / Claude Code"
+                ReportLabels {
+                    display_name: "Claude / Claude Code",
+                    provider_name: "Anthropic",
+                    application_name: "Claude / Claude Code"
+                }
             )
         );
-        println!("Anthropic application-layer evidence: NOT AVAILABLE");
     }
     if !live_canary || verbose {
         if live_canary {

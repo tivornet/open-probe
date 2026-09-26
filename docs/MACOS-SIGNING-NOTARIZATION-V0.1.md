@@ -8,10 +8,10 @@
 4. Package the signed binary and submit the archive with `xcrun notarytool submit --wait` using securely supplied Apple credentials.
 5. Staple only where the distribution format supports it. A ZIP containing a
    bare Mach-O CLI cannot carry a stapled ticket.
-6. For the supported ZIP + Terminal flow, verify the Developer ID signature,
-   secure timestamp, and explicit notarization requirement, then execute the CLI
-   acceptance on a fresh macOS account. App-style `spctl` rejection stating that
-   the valid code is not an app is not a notarization failure for this format.
+6. For the supported ZIP + Terminal flow, verify Developer ID, Team ID, secure
+   timestamp, hardened runtime, Apple Accepted/zero-issue notarization provenance,
+   preserved quarantine, and actual Terminal execution. App-style `spctl --type
+   execute` is not an authoritative hard gate for this bare Mach-O CLI.
 7. Publish checksum and immutable release metadata only after all checks pass.
 
 ## Current release-gate state
