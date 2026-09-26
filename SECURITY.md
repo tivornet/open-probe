@@ -1,15 +1,9 @@
 # Security Policy
 
-Open Probe V0.1 is pre-release software. Do not use it with credentials or
-private configuration. Report suspected vulnerabilities privately through
-`PLACEHOLDER_SECURITY_CONTACT` once that channel is published. Do not open a
+Open Probe V0.1 is Beta software. Do not use it with credentials or private
+configuration. Report suspected vulnerabilities through [GitHub private vulnerability reporting](https://github.com/tivornet/open-probe/security/advisories/new). Do not open a
 public issue or include tokens, cookies, subscription URLs, proxy credentials,
 exact IPs, hostnames, or unredacted output.
 
-The project will not publish release artifacts until dependency review, SBOM,
-checksums, signing, install/uninstall documentation, and the responsible
-disclosure channel are complete.
-
-Supported versions and response targets will be published with the first signed
-beta. Until then, no public binary is supported. Maintainers must acknowledge a
+Only the latest signed V0.1 Beta is supported. Maintainers will acknowledge a
 valid private report before requesting further diagnostic material.

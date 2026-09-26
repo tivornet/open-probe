@@ -10,6 +10,8 @@ use probe_platform_macos::{PlatformError, PlatformErrorCode, PlatformSnapshot, P
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
+pub mod reliability;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct Plan {
     pub network_execution: bool,

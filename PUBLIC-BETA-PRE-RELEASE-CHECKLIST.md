@@ -9,13 +9,15 @@
 - [x] Clean-machine acceptance kit
 - [x] Website release-state Preview prepared with disabled CTAs
 
-## Blocked on Apple
+## Apple release ceremony
 
-- [ ] Developer ID Application identity available
-- [ ] Signing identity fingerprint independently verified
-- [ ] Release binary signed in approved ceremony
-- [ ] Notarization submission accepted
-- [ ] Staple and offline verification pass
+- [x] Developer ID Application identity available
+- [x] Signing identity fingerprint independently verified
+- [x] Release binary signed in approved ceremony with secure timestamp
+- [x] Notarization submission accepted
+- [x] CLI notarization requirement passes
+- [x] Stapling classified as not applicable for the ZIP + bare CLI format
+- [x] App-style `spctl` assessment classified as not applicable for the bare CLI
 
 ## Blocked on Owner
 
@@ -34,9 +36,17 @@
 
 ## Post-notarization
 
-- [ ] Staple ticket and pass Gatekeeper on clean machine
-- [ ] Run clean-machine acceptance without developer tools
+- [x] Verify Developer ID signature, secure timestamp, and notarization requirement
+- [ ] Run M1 cross-machine Terminal acceptance without Gatekeeper bypass,
+      quarantine removal, or ad-hoc re-signing
+- [ ] Run strict pristine-machine acceptance after Beta
 - [ ] Confirm uninstall and privacy/redaction behavior
+
+## Post-V0.1 packaging follow-up
+
+- [ ] Evaluate a signed, notarized, and stapled PKG installer.
+- [ ] Evaluate Homebrew installation and checksum/cask or formula governance.
+- [ ] Keep these packaging changes outside the frozen V0.1 ZIP release gate.
 
 ## Pre-GitHub public
 

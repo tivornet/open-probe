@@ -30,6 +30,7 @@ crates/probe-contracts/Cargo.toml
 crates/probe-contracts/src/lib.rs
 crates/probe-core/Cargo.toml
 crates/probe-core/src/lib.rs
+crates/probe-core/src/reliability.rs
 crates/probe-measurements/Cargo.toml
 crates/probe-measurements/src/dns.rs
 crates/probe-measurements/src/http.rs
@@ -55,6 +56,7 @@ docs/EVIDENCE-SEMANTICS-V0.2-MIGRATION.md
 docs/EXECUTOR-SEMANTIC-EQUIVALENCE-V0.1.md
 docs/FIRST-RUN-UX-V0.1.md
 docs/MACOS-SIGNING-NOTARIZATION-V0.1.md
+docs/MEASUREMENT-MATRIX-V0.1.md
 docs/OPEN-PROBE-V0.1-ARCHITECTURE.md
 docs/OPEN-PROBE-V0.1-CONTRACTS.md
 docs/OPEN-PROBE-V0.1-IMPLEMENTATION-PLAN.md
@@ -65,6 +67,7 @@ docs/RELEASE-BUILD-V0.1.md
 docs/RELEASE-READINESS-CONTRACT-V0.1.md
 docs/SCHEMA-V0.2.md
 docs/TRANSPORT-EXECUTOR-AUDIT-V0.1.md
+docs/WEB-SCANNER-MEASUREMENT-BACKLOG.md
 fixtures/canary/approved-401.json
 fixtures/canary/approved-403.json
 fixtures/canary/budget-violation.json
@@ -87,6 +90,7 @@ fixtures/results/partial.private.v0.1.json
 fixtures/results/partial.private.v0.2.json
 registry/endpoints.v0.1.json
 registry/endpoints.v0.2.json
+registry/measurement-capabilities.v0.1.json
 registry/measurements.v0.1.json
 registry/provider-path-targets.v0.1.json
 registry/providers.v0.1.json
@@ -97,6 +101,7 @@ release/public-repository-manifest.v0.1.json
 rust-toolchain.toml
 schemas/probe-result.v0.1.schema.json
 schemas/probe-result.v0.2.schema.json
+schemas/reliability-snapshot.v0.1.schema.json
 scripts/audit-public-repository-v0.1.sh
 scripts/build-release-v0.1.sh
 scripts/check-release-v0.1.sh

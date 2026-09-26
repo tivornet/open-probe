@@ -13,7 +13,7 @@
     "authentication_requirement": "Authentication is required for application requests; no authentication is used for DNS/TCP/TLS observation.",
     "anonymous_layers": { "dns": "approved", "tcp": "approved", "tls": "approved", "https": "not_approved" },
     "timeout_budget_ms": 5000,
-    "connection_budget": 1,
+    "connection_budget": 5,
     "retry_budget": 0,
     "concurrency": 1,
     "privacy_notes": "No HTTP request, request body, key, OAuth token, cookie, session data, certificate chain retention, or trust-store capture.",

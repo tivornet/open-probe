@@ -13,7 +13,7 @@ It is not a VPN, proxy frontend, routing controller, repair agent, GUI, daemon, 
 - GitHub Copilot: unsupported in V0.1
 - Cursor: unsupported in V0.1
 
-Provider-path evidence is not a provider-health verdict. Unsupported checks are reported as unsupported, never guessed.
+`doctor --provider-path` produces a bounded 25-second physical-exam snapshot with DNS/TCP/TLS/HTTPS metrics where governed, deterministic short-window reliability states, and evidence-backed stage localization. It does not produce a commercial score or root-cause claim. Unsupported checks are reported as unsupported, never guessed.
 
 ## Privacy principles
 
@@ -26,13 +26,7 @@ Provider-path evidence is not a provider-health verdict. Unsupported checks are 
 
 ## Quickstart
 
-The signed and notarized beta does not exist yet. Do not use an unsigned engineering build as a public download.
-
-```text
-PLACEHOLDER_SIGNED_RELEASE
-```
-
-When the signed release exists, verify its published checksum and Apple signature before running:
+Download the signed and notarized Beta from the [official GitHub release](https://github.com/tivornet/open-probe/releases/tag/v0.1.0-beta.1). Verify its published checksum and Apple signature before running:
 
 ```sh
 tivor version

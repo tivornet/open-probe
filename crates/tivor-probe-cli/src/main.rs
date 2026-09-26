@@ -9,9 +9,10 @@ use std::{
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use probe_contracts::{
-    load_and_validate_provider_path_targets, load_and_validate_registries, validate_result,
-    Endpoint, ProviderPathTarget,
+    load_and_validate_capability_registry, load_and_validate_provider_path_targets,
+    load_and_validate_registries, validate_result, Endpoint, ProviderPathTarget,
 };
+use probe_core::reliability::{analyze, physical_exam, Stage, StageSample};
 use probe_core::{
     build_plan, build_private_result, human_summary, normalize_canary, normalize_provider_path,
     CanaryBudget, CanaryOutcome, CanaryTimings, PipelineInput, ProviderPathOutcome, RecordedCanary,
@@ -153,31 +154,99 @@ fn doctor(
         finished_at: rfc3339_utc(finished_epoch),
     };
     let (measurements, providers, endpoints) = load_and_validate_registries()?;
+    let capability_registry = load_and_validate_capability_registry()?;
     let targets = load_and_validate_provider_path_targets(&providers)?;
     let mut protocol_checks = Vec::new();
+    let mut openai_samples = Vec::new();
+    let mut anthropic_samples = Vec::new();
     if live_canary {
-        for endpoint in endpoints
-            .endpoints
-            .iter()
-            .filter(|item| item.status == "approved_canary")
-        {
-            let recorded = execute_endpoint_canary(endpoint, &context.finished_at);
-            match normalize_canary(&recorded, &endpoints) {
-                Ok(check) => protocol_checks.push(check),
-                Err(error) => eprintln!(
-                    "canary_normalization_error endpoint={} isolated=true error={error}",
-                    endpoint.endpoint_id
-                ),
+        let rounds = 5;
+        for round in 0..rounds {
+            for endpoint in endpoints
+                .endpoints
+                .iter()
+                .filter(|item| item.status == "approved_canary")
+            {
+                let recorded = execute_endpoint_canary(endpoint, &context.finished_at);
+                let success = matches!(&recorded.outcome, CanaryOutcome::HttpResponder { .. });
+                let challenge = matches!(
+                    &recorded.outcome,
+                    CanaryOutcome::HttpResponder { status: 401 | 403 }
+                );
+                let dns_ms = recorded.timings_ms.dns;
+                let tcp_ms = recorded
+                    .timings_ms
+                    .connect
+                    .zip(dns_ms)
+                    .map(|(connect, dns)| connect.saturating_sub(dns));
+                let tls_ms = recorded
+                    .timings_ms
+                    .tls
+                    .zip(recorded.timings_ms.connect)
+                    .map(|(tls, connect)| tls.saturating_sub(connect));
+                let https_ms = recorded
+                    .timings_ms
+                    .tls
+                    .map(|tls| recorded.timings_ms.total.saturating_sub(tls));
+                for (stage, latency) in [
+                    (Stage::Dns, dns_ms),
+                    (Stage::Tcp, tcp_ms),
+                    (Stage::Tls, tls_ms),
+                    (Stage::Https, https_ms),
+                ] {
+                    let stage_success = if stage == Stage::Https {
+                        success
+                    } else {
+                        latency.is_some()
+                    };
+                    openai_samples.push(StageSample {
+                        stage,
+                        success: stage_success,
+                        timeout: !stage_success
+                            && matches!(&recorded.outcome, CanaryOutcome::Timeout { .. }),
+                        reset: false,
+                        challenge: stage == Stage::Https && challenge,
+                        latency_ms: stage_success.then_some(latency).flatten(),
+                    });
+                }
+                match normalize_canary(&recorded, &endpoints) {
+                    Ok(mut check) => {
+                        check.check_id = format!("{}.sample-{}", check.check_id, round + 1);
+                        for evidence in &mut check.evidence {
+                            evidence.evidence_id =
+                                format!("{}.sample-{}", evidence.evidence_id, round + 1);
+                        }
+                        protocol_checks.push(check)
+                    }
+                    Err(error) => eprintln!(
+                        "canary_normalization_error endpoint={} isolated=true error={error}",
+                        endpoint.endpoint_id
+                    ),
+                }
             }
-        }
-        for target in &targets.targets {
-            let recorded = execute_provider_path(target, &context.finished_at);
-            match normalize_provider_path(&recorded, &targets) {
-                Ok(check) => protocol_checks.push(check),
-                Err(error) => eprintln!(
-                    "provider_path_normalization_error target={} isolated=true error={error}",
-                    target.target_id
-                ),
+            for target in &targets.targets {
+                let recorded = execute_provider_path(target, &context.finished_at);
+                let success = matches!(&recorded.outcome, ProviderPathOutcome::TlsCompleted { .. });
+                anthropic_samples.push(StageSample{stage:Stage::Tls,success,timeout:matches!(&recorded.outcome,ProviderPathOutcome::Failed{phase,..} if phase=="timeout"),reset:false,challenge:false,latency_ms:success.then_some(recorded.duration_ms)});
+                match normalize_provider_path(&recorded, &targets) {
+                    Ok(mut check) => {
+                        check.check_id = format!("{}.sample-{}", check.check_id, round + 1);
+                        for evidence in &mut check.evidence {
+                            evidence.evidence_id =
+                                format!("{}.sample-{}", evidence.evidence_id, round + 1);
+                        }
+                        protocol_checks.push(check)
+                    }
+                    Err(error) => eprintln!(
+                        "provider_path_normalization_error target={} isolated=true error={error}",
+                        target.target_id
+                    ),
+                }
+            }
+            if round + 1 < rounds {
+                std::thread::sleep(Duration::from_secs(u64::from(
+                    capability_registry.sampling_policy.interval_seconds,
+                )));
             }
         }
     }
@@ -198,6 +267,34 @@ fn doctor(
     if let Some(path) = export_public {
         let export = redact_private_result(&result)?;
         write_json_atomic(path, &export)?;
+    }
+    if live_canary {
+        println!(
+            "\n{}",
+            physical_exam(
+                &analyze(
+                    "openai",
+                    u64::from(capability_registry.sampling_policy.window_seconds),
+                    &openai_samples,
+                    false
+                ),
+                "OpenAI / ChatGPT / Codex"
+            )
+        );
+        println!(
+            "\n{}",
+            physical_exam(
+                &analyze(
+                    "anthropic",
+                    u64::from(capability_registry.sampling_policy.window_seconds),
+                    &anthropic_samples,
+                    false
+                ),
+                "Claude / Claude Code"
+            )
+        );
+        println!("Anthropic application-layer evidence: NOT AVAILABLE");
+        println!("\nMachine semantics (full provider health remains withheld):");
     }
     println!("{}", human_summary(&result));
     println!("provider_path_execution={live_canary}");

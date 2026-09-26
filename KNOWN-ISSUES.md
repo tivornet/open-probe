@@ -7,4 +7,5 @@
 - Gemini, GitHub Copilot, and Cursor are unsupported and remain unexecuted.
 - Captive portals, enterprise interception, and local filtering can make evidence incomplete.
 - Network identity can change between measurements; a single observation is not historical intelligence.
-- Signed/notarized distribution is blocked until the Apple release gate is complete.
+- Long-connection evidence is unavailable because no safe anonymous persistence endpoint is approved.
+- On macOS 26.6.2, a direct `codesign -R=notarized --check-notarization` diagnostic may disagree with Gatekeeper even when the quarantined CLI is accepted as Notarized Developer ID; tracked post-Beta.

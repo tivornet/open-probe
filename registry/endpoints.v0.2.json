@@ -16,7 +16,7 @@
       "expected_response_class": [401, 403],
       "allowed_methods": ["GET"],
       "websocket_requirement": "none",
-      "rate_limit_policy": "manual only; one request per invocation",
+      "rate_limit_policy": "manual only; at most five sequential requests per invocation, five-second interval, concurrency one, no retries",
       "timeout_budget_ms": 5000,
       "retry_budget": 0,
       "max_response_bytes": 16384,

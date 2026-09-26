@@ -1,17 +1,24 @@
 {
   "contract": "PUBLIC_BETA_READINESS_V0.1",
-  "status": "NOT_READY",
+  "status": "SLICE_10_RELEASE_CEREMONY_REQUIRED",
   "gates": {
     "core": "PASS",
     "providers": "PASS",
-    "distribution": "PASS_UNSIGNED_ENGINEERING_CANDIDATE_NOT_PUBLIC",
+    "distribution": "PREVIOUS_CANDIDATE_SUPERSEDED_NEW_BUILD_REQUIRED",
     "package_safe_tls": "PASS",
     "public_repository_audit": "PASS_PRE_RELEASE",
     "public_documentation": "PASS",
     "website_preview": "PASS_DISABLED_CTA",
-    "signing": "ADHOC_ONLY_NO_DEVELOPER_IDENTITY",
-    "notarization": "NOT_ATTEMPTED",
+    "developer_id_signature": "PENDING_NEW_SLICE_10_BUILD",
+    "secure_timestamp": "PENDING_NEW_SLICE_10_BUILD",
+    "apple_notarization": "PENDING_NEW_SLICE_10_BUILD",
+    "cli_notarization_check": "PENDING_NEW_SLICE_10_BUILD",
+    "spctl_app_assessment": "NOT_APPLICABLE_FOR_BARE_CLI",
+    "finder_double_click": "UNSUPPORTED_FLOW",
+    "m1_cross_machine_acceptance": "PENDING_NEW_SLICE_10_BUILD",
+    "strict_fresh_mac_acceptance": "DEFERRED_POST_BETA",
+    "owner_residual_risk_acceptance": true,
     "quality": "PASS"
   },
-  "blocking_gates": ["signing", "notarization"]
+  "blocking_gates": ["slice_10_source_freeze", "signing", "notarization", "m1_cross_machine_acceptance"]
 }

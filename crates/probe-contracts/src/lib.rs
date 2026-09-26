@@ -12,6 +12,10 @@ pub const PROVIDER_REGISTRY: &str = include_str!("../../../registry/providers.v0
 pub const ENDPOINT_REGISTRY: &str = include_str!("../../../registry/endpoints.v0.2.json");
 pub const PROVIDER_PATH_TARGET_REGISTRY: &str =
     include_str!("../../../registry/provider-path-targets.v0.1.json");
+pub const MEASUREMENT_CAPABILITY_REGISTRY: &str =
+    include_str!("../../../registry/measurement-capabilities.v0.1.json");
+pub const RELIABILITY_SNAPSHOT_SCHEMA: &str =
+    include_str!("../../../schemas/reliability-snapshot.v0.1.schema.json");
 
 #[derive(Debug, Error)]
 pub enum ContractError {
@@ -44,6 +48,89 @@ pub struct Measurement {
     pub failure_isolation: String,
     pub evidence: Vec<String>,
     pub limitations: Vec<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct MeasurementCapabilityRegistry {
+    pub registry_version: String,
+    pub kind: String,
+    pub sampling_policy: SamplingPolicy,
+    pub capabilities: Vec<MeasurementCapability>,
+}
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct SamplingPolicy {
+    pub window_seconds: u8,
+    pub interval_seconds: u8,
+    pub concurrency: u8,
+    pub retry_budget: u8,
+}
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct MeasurementCapability {
+    pub capability_id: String,
+    pub protocol_stage: String,
+    pub method: String,
+    pub proves: String,
+    pub does_not_prove: String,
+    pub privacy_impact: String,
+    pub endpoint_impact: String,
+    pub sampling_cost: String,
+    pub provider_applicability: String,
+    pub failure_semantics: String,
+    pub public_export_policy: String,
+    pub capability_version: String,
+}
+
+pub fn load_and_validate_capability_registry(
+) -> Result<MeasurementCapabilityRegistry, ContractError> {
+    let registry: MeasurementCapabilityRegistry =
+        serde_json::from_str(MEASUREMENT_CAPABILITY_REGISTRY)?;
+    ensure_version(&registry.registry_version)?;
+    ensure_unique(
+        registry
+            .capabilities
+            .iter()
+            .map(|c| c.capability_id.as_str()),
+        "capability_id",
+    )?;
+    let policy = &registry.sampling_policy;
+    if !(20..=30).contains(&policy.window_seconds)
+        || policy.interval_seconds == 0
+        || policy.concurrency != 1
+        || policy.retry_budget != 0
+    {
+        return Err(ContractError::Registry("unsafe sampling policy".into()));
+    }
+    for capability in &registry.capabilities {
+        ensure_version(&capability.capability_version)?;
+        if capability.method.is_empty()
+            || capability.proves.is_empty()
+            || capability.does_not_prove.is_empty()
+            || capability.privacy_impact.is_empty()
+            || capability.endpoint_impact.is_empty()
+            || capability.public_export_policy.is_empty()
+        {
+            return Err(ContractError::Registry(format!(
+                "{} has incomplete governance",
+                capability.capability_id
+            )));
+        }
+    }
+    Ok(registry)
+}
+
+pub fn validate_reliability_snapshot(instance: &Value) -> Result<(), ContractError> {
+    let schema: Value = serde_json::from_str(RELIABILITY_SNAPSHOT_SCHEMA)?;
+    let validator =
+        jsonschema::validator_for(&schema).map_err(|e| ContractError::Schema(e.to_string()))?;
+    let messages: Vec<_> = validator
+        .iter_errors(instance)
+        .map(|e| e.to_string())
+        .collect();
+    if messages.is_empty() {
+        Ok(())
+    } else {
+        Err(ContractError::Validation(messages.join("; ")))
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -191,7 +278,7 @@ pub fn load_and_validate_provider_path_targets(
             || target.anonymous_layers["https"] != "not_approved"
             || target.timeout_budget_ms == 0
             || target.timeout_budget_ms > 10_000
-            || target.connection_budget != 1
+            || target.connection_budget != 5
             || target.retry_budget != 0
             || target.concurrency != 1
         {
@@ -443,8 +530,21 @@ mod tests {
         assert_eq!(target.provider_id, "anthropic");
         assert_eq!(target.anonymous_layers["tls"], "approved");
         assert_eq!(target.anonymous_layers["https"], "not_approved");
-        assert_eq!(target.connection_budget, 1);
+        assert_eq!(target.connection_budget, 5);
         assert_eq!(target.retry_budget, 0);
+    }
+
+    #[test]
+    fn measurement_capabilities_have_safe_sampling_governance() {
+        let registry = load_and_validate_capability_registry().unwrap();
+        assert_eq!(registry.sampling_policy.window_seconds, 25);
+        assert_eq!(registry.sampling_policy.concurrency, 1);
+        assert_eq!(registry.sampling_policy.retry_budget, 0);
+        assert!(registry
+            .capabilities
+            .iter()
+            .any(|c| c.capability_id == "long_connection.observe"
+                && c.failure_semantics == "NOT_AVAILABLE"));
     }
 
     #[test]
